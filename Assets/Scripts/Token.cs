@@ -13,6 +13,6 @@ public class Token
 
     public override string ToString()
     {
-        return Type.ToString() + " " + Text;
+        return Type.ToString() + " " + Text + " in line " + Line;
     }    
 }
