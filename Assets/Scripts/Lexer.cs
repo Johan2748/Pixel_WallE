@@ -1,10 +1,5 @@
 using System.Collections.Generic;
 using MyTools;
-using NUnit.Framework;
-using Unity.Mathematics;
-using Unity.VisualScripting;
-using UnityEditor;
-using UnityEngine;
 
 public class Lexer
 {
@@ -22,6 +17,7 @@ public class Lexer
         this.text = text;
         Tokens = new List<Token>();
         InitializeKeywords();
+        GetTokens();
     }
 
     private void InitializeKeywords()
