@@ -1,28 +1,46 @@
-using UnityEngine;
+
 
 public abstract class Statement : AST
 {
-    
+
 }
 
 
-public class Tag : Statement
+public class Label : Statement
 {
     public Token Id;
 
-    public Tag(Token id)
+    public Label(Token id)
     {
         Id = id;
     }
 
-    public override void Print()
+    public override string ToString()
     {
-        Debug.Log(Id.Text);
+        return Id.Text;
     }
 
 }
 
-public class GoToStatement
+public class GoToStatement : Statement
+{
+    public Expresion Condition;
+    public Label Label;
+
+    public GoToStatement(Label label, Expresion expresion)
+    {
+        Label = label;
+        Condition = expresion;
+    }
+
+    public override string ToString()
+    {
+        return "GoTo [" + Label.ToString() + "](" + Condition.ToString() + ")";
+    }
+}
+
+
+public class Assign
 {
     
 }

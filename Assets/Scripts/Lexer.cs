@@ -161,7 +161,7 @@ public class Lexer
 
                 else if (Check.IsAlphaNum(c)) GetID();
 
-                else ErrorManager.AddError(new Error(line, "Unexpected character.")); 
+                else ErrorManager.AddError(new Error(line, $"Unexpected character '{c}'"));
                 break;
                 
         }

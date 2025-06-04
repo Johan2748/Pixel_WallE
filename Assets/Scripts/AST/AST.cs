@@ -1,14 +1,11 @@
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Analytics;
-
 public abstract class AST
 {
     public int Location { get; protected set; }
 
     public AstType Type { get; protected set; } = AstType.UNKNOWN;
 
-    public abstract void Print();
+    public abstract override string ToString();
 
 }
 
@@ -21,17 +18,21 @@ public class Program : AST
         Body = new List<AST>();
     }
 
-    public override void Print()
+    public override string ToString()
     {
-        
+        throw new System.NotImplementedException();
     }
+
 }
-
-
 
 
 
 public enum AstType
 {
-    UNKNOWN, INT, BOOL
+    UNKNOWN, INT, BOOL, COLOR, RETURNFUNCTION, VOIDFUNCTION
+}
+
+public interface IEvaluable
+{
+    public int Evaluate();
 }

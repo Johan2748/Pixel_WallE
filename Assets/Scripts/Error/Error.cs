@@ -1,6 +1,7 @@
+using System;
 using UnityEngine;
 
-public class Error
+public class Error : Exception
 {
     private int line;
     private string message;

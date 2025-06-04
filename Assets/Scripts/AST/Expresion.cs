@@ -1,5 +1,4 @@
-using System.Xml.Serialization;
-using UnityEngine;
+
 
 public abstract class Expresion : AST
 {
@@ -10,9 +9,9 @@ public abstract class Literal : Expresion
 {
     public Token Token { get; protected set; }
 
-    public override void Print()
+    public override string ToString()
     {
-        Debug.Log(Token.Text);
+        return Token.Text;
     }
 
 }
@@ -39,6 +38,17 @@ public class Bool : Literal
     }
 }
 
+public class PixelColor : Literal
+{
+    public PixelColor(Token token)
+    {
+        Token = token;
+        Value = token.Text;
+        Location = token.Line;
+        Type = AstType.COLOR;
+    }
+}
+
 public class UnaryExpresion : Expresion
 {
     public Token Operation;
@@ -50,10 +60,9 @@ public class UnaryExpresion : Expresion
         Expresion = expresion;
     }
 
-    public override void Print()
+    public override string ToString()
     {
-        Debug.Log($"{Operation.Text} ");
-        Expresion.Print();
+        return Operation.Text + Expresion.ToString();
     }
 }
 
@@ -70,11 +79,9 @@ public class BinaryExpresion : Expresion
         Right = right;
     }
 
-    public override void Print()
+    public override string ToString()
     {
-        Left.Print();
-        Debug.Log($" {Operation.Text} ");
-        Right.Print();
+        return Left.ToString() + " " + Operation.Text + " " + Right.ToString();
     }
 
 
