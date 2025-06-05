@@ -78,45 +78,58 @@ public class Parser
     }
 
 
-    // PARSER DE EXPRESIONES ARITMETICAS
+    // PARSER DE EXPRESIONES
 
-    private UnaryExpresion ParseUnaryExpr()
-    {
-        Token op = Previous();
-        return new UnaryExpresion(op, ParseExpresion());
-    }
-
-    private Expresion ParseFactor()
+    public Expresion ParseExpresion()
     {
         try
         {
-            if (Match(TokenType.NUMBER)) return new Number(Previous());
-            else if (Match(TokenType.MINUS) || Match(TokenType.PLUS)) return ParseUnaryExpr();
-            else if (Match(TokenType.LEFT_PAREN))
-            {
-                Expresion expr = ParseExpresion();
-                Eat(TokenType.RIGHT_PAREN, "Expected ')' after expresion");
-                Debug.Log(expr.ToString());
-                return expr;
-            }
-            else throw new Error(Current().Line, "Invalid Expresion");
+            Expresion expr = ParseBooleanTerm();
+        while (Match(TokenType.AND))
+        {
+            Token op = Previous();
+            expr = new BinaryExpresion(expr, op, ParseBooleanTerm());
+            
         }
-        catch (Error error)
+        return expr;
+        }catch (Error error)
         {
             error.Report();
             return null;
         }
+        
     }
 
-    private Expresion ParsePow()
+    private Expresion ParseBooleanTerm()
     {
-        Expresion expr = ParseFactor();
-        while (Match(TokenType.STAR_STAR))
+        Expresion expr = ParseComparison();
+        while (Match(TokenType.OR))
         {
             Token op = Previous();
-            expr = new BinaryExpresion(expr, op, ParseFactor());
+            expr = new BinaryExpresion(expr, op, ParseComparison());
         }
-        Debug.Log(expr.ToString());
+        return expr;
+    }
+
+    private Expresion ParseComparison()
+    {
+        Expresion expr = ParseArithmeticExpresion();
+        while (Match(TokenType.GREATER) || Match(TokenType.GREATER_EQUAL) || Match(TokenType.LESS) || Match(TokenType.LESS_EQUAL) || Match(TokenType.EQUAL_EQUAL) || Match(TokenType.NOT_EQUAL))
+        {
+            Token op = Previous();
+            expr = new BinaryExpresion(expr, op, ParseArithmeticExpresion());
+        }
+        return expr;
+    }
+
+    private Expresion ParseArithmeticExpresion()
+    {
+        Expresion expr = ParseTerm();
+        while (Match(TokenType.PLUS) || Match(TokenType.MINUS))
+        {
+            Token op = Previous();
+            expr = new BinaryExpresion(expr, op, ParseTerm());
+        }
         return expr;
     }
 
@@ -128,57 +141,39 @@ public class Parser
             Token op = Previous();
             expr = new BinaryExpresion(expr, op, ParsePow());
         }
-        Debug.Log(expr.ToString());
         return expr;
     }
 
-    public Expresion ParseExpresion()
+    private Expresion ParsePow()
     {
-        Expresion expr = ParseTerm();
-        while (Match(TokenType.PLUS) || Match(TokenType.MINUS))
+        Expresion expr = ParseFactor();
+        while (Match(TokenType.STAR_STAR))
         {
             Token op = Previous();
-            expr = new BinaryExpresion(expr, op, ParseTerm());
+            expr = new BinaryExpresion(expr, op, ParseFactor());
         }
-        Debug.Log(expr.ToString());
         return expr;
     }
 
+    private Expresion ParseFactor()
+    {
+        if (Match(TokenType.NUMBER)) return new Number(Previous());
+            else if (Match(TokenType.FALSE) || Match(TokenType.TRUE)) return new Bool(Previous());
+            else if (Match(TokenType.MINUS) || Match(TokenType.PLUS) || Match(TokenType.NOT)) return ParseUnaryExpr();
+            else if (Match(TokenType.LEFT_PAREN))
+            {
+                Expresion expr = ParseExpresion();
+                Eat(TokenType.RIGHT_PAREN, "Expected ')' after expresion");
+                return expr;
+            }
+            else throw new Error(Current().Line, "Invalid Expresion");
+    }
 
-    // PARSER DE EXPRESIONES BOOLEANAS
-/*
-    public Expresion ParseBooleanUnaryExpr()
+    private UnaryExpresion ParseUnaryExpr()
     {
         Token op = Previous();
-        return new UnaryExpresion(op, ParseBooleanExpr()); 
+        return new UnaryExpresion(op, ParseExpresion());
     }
-
-    public Expresion ParseComparison()
-    {
-        Expresion expr = ParseExpresion();
-        while(Match(TokenType.GREATER) || Match(TokenType.GREATER_EQUAL) || Match(TokenType.LESS) || Match(TokenType.LESS_EQUAL))
-    }
-
-    public Expresion ParseBooleanFactor()
-    {
-        if (Match(TokenType.FALSE) || Match(TokenType.TRUE)) return new Bool(Previous());
-        //else if (Match)
-    }
-
-
-
-
-
-*/
-
-
-
-
-    public Expresion ParseBooleanExpr()
-    {
-        return null;
-    }
-
 
 
 

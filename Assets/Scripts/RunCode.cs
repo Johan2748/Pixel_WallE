@@ -12,6 +12,8 @@ public class RunCode : MonoBehaviour
             Debug.Log(token.ToString());
         }
         Expresion e = parser.ParseExpresion();
+        Debug.Log(e.ToString());
+        Debug.Log(e.Value);
 
         ErrorManager.ShowErrors();
     }
