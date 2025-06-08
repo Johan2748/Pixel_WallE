@@ -123,6 +123,7 @@ public class Lexer
             case '-': AddToken(TokenType.MINUS); break;
             case '/': AddToken(TokenType.SLASH); break;
             case '%': AddToken(TokenType.MOD); break;
+            case '_': ErrorManager.AddError(new UnexpectedCharacterError(line, c)); break;
 
             //one or two character tokens
             case '*':
@@ -161,7 +162,7 @@ public class Lexer
 
                 else if (Check.IsAlphaNum(c)) GetID();
 
-                else ErrorManager.AddError(new Error(line, $"Unexpected character '{c}'"));
+                else ErrorManager.AddError(new UnexpectedCharacterError(line, c));
                 break;
                 
         }

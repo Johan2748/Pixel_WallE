@@ -20,19 +20,20 @@ public class Program : AST
 
     public override string ToString()
     {
-        throw new System.NotImplementedException();
+        string text = "";
+        foreach (AST ast in Body)
+        {
+            if (ast is not null) text += ast.ToString() + "\n";
+            else text += "ERROR\n";
+        }
+        return text;
     }
 
 }
 
 
-
 public enum AstType
 {
-    UNKNOWN, INT, BOOL, COLOR, RETURNFUNCTION, VOIDFUNCTION
+    UNKNOWN, INT, BOOL, COLOR, LABEL
 }
 
-public interface IEvaluable
-{
-    public int Evaluate();
-}

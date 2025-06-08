@@ -4,12 +4,14 @@ using UnityEngine;
 public class Parser
 {
     public List<Token> Tokens;
+    public Scope scope;
 
     private int current = 0;
 
     public Parser(Lexer lexer)
     {
         Tokens = lexer.Tokens;
+        scope = new();
     }
 
     private Token Current()
@@ -34,13 +36,22 @@ public class Parser
 
     private bool IsAtEnd()
     {
-        if (Current().Type == TokenType.EOF) return true;
+        if ((current >= Tokens.Count) || (Current().Type == TokenType.EOF)) return true;
+        return false;
+    }
+
+    private bool CheckType(TokenType tokenType)
+    {
+        if (tokenType == Current().Type)
+        {
+            return true;
+        }
         return false;
     }
 
     private bool Match(TokenType tokenType)
     {
-        if (tokenType == Current().Type)
+        if (CheckType(tokenType))
         {
             Advance();
             return true;
@@ -51,31 +62,34 @@ public class Parser
 
     private void Eat(TokenType tokenType, string error)
     {
-        if (Current().Type == tokenType) Advance();
+        if (CheckType(tokenType)) Advance();
         else throw new Error(Current().Line, error);
+    }
+
+    private void Synchronize()
+    {
+        while (!IsAtEnd())
+        {
+            Advance();
+            if (Previous().Type == TokenType.EO_LINE) break;
+        }
     }
 
 
 
-
-    private Program ParseProgram()
+    public Program ParseProgram()
     {
         Program program = new Program();
 
         while (!IsAtEnd())
         {
-            Token current = Current();
-            if (current.Type == TokenType.ID) program.Body.Add(ParseStatement());
-            else program.Body.Add(ParseExpresion());
+            program.Body.Add(ParseStatement());
         }
 
         return program;
     }
 
-    public Statement ParseStatement()
-    {
-        return null;
-    }
+
 
 
     // PARSER DE EXPRESIONES
@@ -85,19 +99,20 @@ public class Parser
         try
         {
             Expresion expr = ParseBooleanTerm();
-        while (Match(TokenType.AND))
-        {
-            Token op = Previous();
-            expr = new BinaryExpresion(expr, op, ParseBooleanTerm());
-            
+            while (Match(TokenType.AND))
+            {
+                Token op = Previous();
+                expr = new BinaryExpresion(expr, op, ParseBooleanTerm());
+
+            }
+            return expr;
         }
-        return expr;
-        }catch (Error error)
+        catch (Error error)
         {
-            error.Report();
+            ErrorManager.AddError(error);
             return null;
         }
-        
+
     }
 
     private Expresion ParseBooleanTerm()
@@ -158,35 +173,119 @@ public class Parser
     private Expresion ParseFactor()
     {
         if (Match(TokenType.NUMBER)) return new Number(Previous());
-            else if (Match(TokenType.FALSE) || Match(TokenType.TRUE)) return new Bool(Previous());
-            else if (Match(TokenType.MINUS) || Match(TokenType.PLUS) || Match(TokenType.NOT)) return ParseUnaryExpr();
-            else if (Match(TokenType.LEFT_PAREN))
-            {
-                Expresion expr = ParseExpresion();
-                Eat(TokenType.RIGHT_PAREN, "Expected ')' after expresion");
-                return expr;
-            }
-            else throw new Error(Current().Line, "Invalid Expresion");
+        else if (Match(TokenType.FALSE) || Match(TokenType.TRUE)) return new Bool(Previous());
+        else if (Match(TokenType.MINUS) || Match(TokenType.PLUS) || Match(TokenType.NOT)) return ParseUnaryExpr();
+        else if (Match(TokenType.COLOR)) return new PixelColor(Previous());
+        else if (Match(TokenType.ID))
+        {
+            Token var = Previous();
+            if (!scope.ContainsVar(var)) throw new Error(var.Line, $"The name '{var.Text}' does not exist in the current context");
+            return scope.GetVarExpresion(var);
+        }
+        else if (Match(TokenType.LEFT_PAREN))
+        {
+            Expresion expr = ParseExpresion();
+            Eat(TokenType.RIGHT_PAREN, "Expected ')' after expresion");
+            return expr;
+        }
+        else throw new Error(Current().Line, "Invalid Expresion");
     }
 
     private UnaryExpresion ParseUnaryExpr()
     {
         Token op = Previous();
-        return new UnaryExpresion(op, ParseExpresion());
+        return new UnaryExpresion(op, ParseFactor());
     }
 
 
 
+    // PARSER DE DECLARACIONES
 
 
+    public Statement ParseStatement()
+    {
+        try
+        {
+            if (Match(TokenType.GOTO)) return ParseGoTo();
+            
+            Eat(TokenType.ID, "Only assignment, call and label declaration can be used as a statement");
+            if (CheckType(TokenType.EO_LINE) || CheckType(TokenType.EOF)) return ParseLabel();
+            else if (CheckType(TokenType.ASSIGN)) return ParseAssign();
+            else return ParseFunctionCall();
+        }
+        catch (Error error)
+        {
+            ErrorManager.AddError(error);
+            Synchronize();
+            return null;
+        }
+    }
 
+    public Label ParseLabel()
+    {
+        Label label = new(Previous());        
+        if (scope.ContainsLabel(label))
+        {
+            throw new Error(label.Location, $"A label named '{label.Id.Text}' is alredy define");
+        }
+        scope.AddLabel(label);
+        Advance();
+        return label;
+    }
 
+    public Var ParseAssign()
+    {
+        Token id = Previous();
+        Advance();
+        Expresion expr = ParseExpresion();
+        if (expr is not null)
+        {
+            Var var = new(id, expr);
+            if (Match(TokenType.EO_LINE) || Match(TokenType.EOF))
+            {
+                scope.AddVar(var);
+                return var;
+            }
+            else throw new Error(id.Line, "Expected end of line");
+        }
+        return null;
+    }
 
+    public GoToStatement ParseGoTo()
+    {
+        Eat(TokenType.LEFT_BRACKET, "Expected '[' after GoTo declaration");
+        Eat(TokenType.ID, "Expected label");
+        Label label = new(Previous());
+        Eat(TokenType.RIGHT_BRACKET, "Expected ']' after label");
+        Eat(TokenType.LEFT_PAREN, "Expected '(' before condition");
+        Expresion expr = ParseExpresion();
+        if (expr is null) throw new Error(label.Location, "Invalid condition"); 
+        if (expr.Type != AstType.BOOL) throw new Error(expr.Location, "Invalid condition");
+        Eat(TokenType.RIGHT_PAREN, "Expected ')' after condition");
+        return new GoToStatement(label, expr);
+    }
 
+    public FunctionCall ParseFunctionCall()
+    {
+        Token id = Previous();
+        if (!BuiltInFunctions.IsAlreadyDeclared(id.Text)) throw new Error(id.Line, "Unknown function");
+        var function = BuiltInFunctions.GetFuction(id.Text);
+        Eat(TokenType.LEFT_PAREN, "Expected '(' after function");
+        List<Expresion> arguments = new();
+        if (!CheckType(TokenType.RIGHT_PAREN))
+        {
+            do
+            {
+                arguments.Add(ParseExpresion());
+            }
+            while (Match(TokenType.COMMA));
+        }
+        Eat(TokenType.RIGHT_PAREN, "Expected ')' after arguments");
 
+        if (arguments.Count != function.Arity) throw new Error(id.Line, $"Function {id.Text} expects {function.Arity} arguments");
 
-
-
+        return new FunctionCall(id, arguments);
+    }
 
 
 

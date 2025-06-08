@@ -41,7 +41,7 @@ public class Bool : Literal
 
 public class PixelColor : Literal
 {
-    public override object Value { get => Value = Token.Text; protected set {} }
+    public override object Value { get => Token.Text; protected set { } }
     public PixelColor(Token token)
     {
         Token = token;
@@ -49,6 +49,7 @@ public class PixelColor : Literal
         Type = AstType.COLOR;
     }
 }
+
 
 public class UnaryExpresion : Expresion
 {
@@ -82,12 +83,12 @@ public class UnaryExpresion : Expresion
     {
         if (Operation.Type == TokenType.NOT)
         {
-            if (Expresion.Type != AstType.BOOL) throw new Error(Location, "Invalid Expresion");
+            if (Expresion.Type != AstType.BOOL) throw new UnaryExprError(Operation, Expresion);
             Type = AstType.BOOL;
         }
         if (Operation.Type == TokenType.MINUS)
         {
-            if (Expresion.Type != AstType.INT) throw new Error(Location, "Invalid Expresion");
+            if (Expresion.Type != AstType.INT) throw new UnaryExprError(Operation, Expresion);
             Type = AstType.INT;
         }
     }
@@ -125,7 +126,7 @@ public class BinaryExpresion : Expresion
             else if (Operation.Type == TokenType.NOT_EQUAL) return Left.Value != Right.Value;
             else if (Operation.Type == TokenType.AND) return (bool)Left.Value && (bool)Right.Value;
             else if (Operation.Type == TokenType.OR) return (bool)Left.Value || (bool)Right.Value;
-            else throw new Exception("mala implementacion de la expresion");
+            else throw new Error(Location, "Invalid Expresion");
         }
 
         protected set { }
@@ -149,19 +150,19 @@ public class BinaryExpresion : Expresion
     {
         if (Check.IsArithmeticOp(Operation.Type))
         {
-            if (Left.Type != AstType.INT || Right.Type != AstType.INT) throw new Error(Location, "Invalid Expresion");
+            if (Left.Type != AstType.INT || Right.Type != AstType.INT) throw new BinOpError(Left, Operation, Right);
             Type = AstType.INT;
         }
 
         if (Check.IsBooleanOp(Operation.Type))
         {
-            if (Left.Type != AstType.BOOL || Right.Type != AstType.BOOL) throw new Error(Location, "Invalid Expresion");
+            if (Left.Type != AstType.BOOL || Right.Type != AstType.BOOL) throw new BinOpError(Left, Operation, Right);
             Type = AstType.BOOL;
         }
 
         if (Check.IsComparerOp(Operation.Type))
         {
-            if (Left.Type != AstType.INT || Right.Type != AstType.INT) throw new Error(Location, "Invalid Expresion");
+            if (Left.Type != AstType.INT || Right.Type != AstType.INT) throw new BinOpError(Left, Operation, Right);
             Type = AstType.BOOL;
         }
     }

@@ -4,6 +4,7 @@ public class RunCode : MonoBehaviour
 {
     public void Run()
     {
+        ErrorManager.Restart();
         Lexer lexer = new Lexer(ReadInputText.input);
         Parser parser = new Parser(lexer);
         Debug.Log(parser.Tokens.Count);
@@ -11,11 +12,10 @@ public class RunCode : MonoBehaviour
         {
             Debug.Log(token.ToString());
         }
-        Expresion e = parser.ParseExpresion();
-        Debug.Log(e.ToString());
-        Debug.Log(e.Value);
-
+        Program program = parser.ParseProgram();
         ErrorManager.ShowErrors();
+        Debug.Log(program.ToString());
+
     }
 
 }
