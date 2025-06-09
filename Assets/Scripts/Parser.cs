@@ -176,6 +176,11 @@ public class Parser
         else if (Match(TokenType.FALSE) || Match(TokenType.TRUE)) return new Bool(Previous());
         else if (Match(TokenType.MINUS) || Match(TokenType.PLUS) || Match(TokenType.NOT)) return ParseUnaryExpr();
         else if (Match(TokenType.COLOR)) return new PixelColor(Previous());
+        else if (CheckType(TokenType.ID) && Peek().Type == TokenType.LEFT_PAREN)
+        {
+            Match(TokenType.ID);
+            return ParseFunction();
+         }
         else if (Match(TokenType.ID))
         {
             Token var = Previous();
@@ -197,21 +202,49 @@ public class Parser
         return new UnaryExpresion(op, ParseFactor());
     }
 
+    private Function ParseFunction()
+    {
+        Token id = Previous();
+        if (!BuiltInFunctions.IsFunction(id.Text)) throw new Error(id.Line, "Unknown function");
+        var function = BuiltInFunctions.GetFunction(id.Text);
+        Eat(TokenType.LEFT_PAREN, "Expected '(' before arguments");
+        List<Expresion> arguments = new();
+        if (!CheckType(TokenType.RIGHT_PAREN))
+        {
+            do
+            {
+                arguments.Add(ParseExpresion());
+            }
+            while (Match(TokenType.COMMA));
+        }
+        Eat(TokenType.RIGHT_PAREN, "Expected ')' after arguments");
 
+        if (arguments.Count != function.Arity) throw new Error(id.Line, $"function {id.Text} expects {function.Arity} arguments");
+        if (!function.CheckArguments(arguments)) throw new Error(id.Line, "Invalid argument in function");
+        
+        return new Function(id, arguments, function);
+    }
 
     // PARSER DE DECLARACIONES
 
 
     public Statement ParseStatement()
     {
+        
         try
         {
-            if (Match(TokenType.GOTO)) return ParseGoTo();
-            
-            Eat(TokenType.ID, "Only assignment, call and label declaration can be used as a statement");
-            if (CheckType(TokenType.EO_LINE) || CheckType(TokenType.EOF)) return ParseLabel();
-            else if (CheckType(TokenType.ASSIGN)) return ParseAssign();
-            else return ParseFunctionCall();
+            Statement stmt;
+
+            if (Match(TokenType.GOTO)) stmt = ParseGoTo();
+            else
+            {
+                Eat(TokenType.ID, "Only assignment, call and label declaration can be used as a statement");
+                if (CheckType(TokenType.EO_LINE) || CheckType(TokenType.EOF)) stmt = ParseLabel();
+                else if (CheckType(TokenType.ASSIGN)) stmt = ParseAssign();
+                else stmt = ParseInstructionCall();
+            }
+            if (!IsAtEnd()) Eat(TokenType.EO_LINE, "Expected end of line after a statment");
+            return stmt;
         }
         catch (Error error)
         {
@@ -229,7 +262,6 @@ public class Parser
             throw new Error(label.Location, $"A label named '{label.Id.Text}' is alredy define");
         }
         scope.AddLabel(label);
-        Advance();
         return label;
     }
 
@@ -241,19 +273,15 @@ public class Parser
         if (expr is not null)
         {
             Var var = new(id, expr);
-            if (Match(TokenType.EO_LINE) || Match(TokenType.EOF))
-            {
-                scope.AddVar(var);
-                return var;
-            }
-            else throw new Error(id.Line, "Expected end of line");
+            scope.AddVar(var);
+            return var;
         }
         return null;
     }
 
     public GoToStatement ParseGoTo()
     {
-        Eat(TokenType.LEFT_BRACKET, "Expected '[' after GoTo declaration");
+        Eat(TokenType.LEFT_BRACKET, "Expected '[' after GoTo instruction");
         Eat(TokenType.ID, "Expected label");
         Label label = new(Previous());
         Eat(TokenType.RIGHT_BRACKET, "Expected ']' after label");
@@ -265,12 +293,12 @@ public class Parser
         return new GoToStatement(label, expr);
     }
 
-    public FunctionCall ParseFunctionCall()
+    public InstructionCall ParseInstructionCall()
     {
         Token id = Previous();
-        if (!BuiltInFunctions.IsAlreadyDeclared(id.Text)) throw new Error(id.Line, "Unknown function");
-        var function = BuiltInFunctions.GetFuction(id.Text);
-        Eat(TokenType.LEFT_PAREN, "Expected '(' after function");
+        if (!BuiltInFunctions.IsInstruction(id.Text)) throw new Error(id.Line, "Unknown instruction");
+        var instruction = BuiltInFunctions.GetInstruction(id.Text);
+        Eat(TokenType.LEFT_PAREN, "Expected '(' before arguments");
         List<Expresion> arguments = new();
         if (!CheckType(TokenType.RIGHT_PAREN))
         {
@@ -282,11 +310,11 @@ public class Parser
         }
         Eat(TokenType.RIGHT_PAREN, "Expected ')' after arguments");
 
-        if (arguments.Count != function.Arity) throw new Error(id.Line, $"Function {id.Text} expects {function.Arity} arguments");
-
-        return new FunctionCall(id, arguments);
+        if (arguments.Count != instruction.Arity) throw new Error(id.Line, $"Instruction {id.Text} expects {instruction.Arity} arguments");
+        if (!instruction.CheckArguments(arguments)) throw new Error(id.Line, "Invalid argument in instruction");
+        
+        return new InstructionCall(id, arguments, instruction);
     }
-
 
 
 

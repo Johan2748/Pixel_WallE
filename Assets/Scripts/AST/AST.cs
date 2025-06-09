@@ -3,7 +3,7 @@ public abstract class AST
 {
     public int Location { get; protected set; }
 
-    public AstType Type { get; protected set; } = AstType.UNKNOWN;
+    public AstType Type { get; protected set; } = AstType.NULL;
 
     public abstract override string ToString();
 
@@ -34,6 +34,6 @@ public class Program : AST
 
 public enum AstType
 {
-    UNKNOWN, INT, BOOL, COLOR, LABEL
+    NULL, INT, BOOL, COLOR
 }
 

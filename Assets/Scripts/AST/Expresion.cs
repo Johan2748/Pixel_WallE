@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
 using MyTools;
+using Unity.VisualScripting;
 
 public abstract class Expresion : AST
 {
-    public abstract object Value { get; protected set; }    
+    public abstract object Value { get; protected set; }
+
+    protected abstract void CheckType();
 }
 
 public abstract class Literal : Expresion
@@ -20,33 +24,42 @@ public abstract class Literal : Expresion
 public class Number : Literal
 {
     public override object Value { get => int.Parse(Token.Text); protected set {} }
+
+    protected override void CheckType() => Type = AstType.INT;
+
     public Number(Token token)
     {
         Token = token;
         Location = token.Line;
-        Type = AstType.INT;
+        CheckType();
     }
 }
 
 public class Bool : Literal
 {
     public override object Value { get => bool.Parse(Token.Text); protected set {} }
+
+    protected override void CheckType() => Type = AstType.BOOL;
+
     public Bool(Token token)
     {
         Token = token;
         Location = token.Line;
-        Type = AstType.BOOL;
+        CheckType();
     }
 }
 
 public class PixelColor : Literal
 {
     public override object Value { get => Token.Text; protected set { } }
+
+    protected override void CheckType() => Type = AstType.COLOR;
+
     public PixelColor(Token token)
     {
         Token = token;
         Location = token.Line;
-        Type = AstType.COLOR;
+        CheckType();
     }
 }
 
@@ -79,7 +92,7 @@ public class UnaryExpresion : Expresion
         return Operation.Text + Expresion.ToString();
     }
 
-    private void CheckType()
+    protected override void CheckType()
     {
         if (Operation.Type == TokenType.NOT)
         {
@@ -146,7 +159,7 @@ public class BinaryExpresion : Expresion
         return Left.ToString() + " " + Operation.Text + " " + Right.ToString();
     }
 
-    private void CheckType()
+    protected override void CheckType()
     {
         if (Check.IsArithmeticOp(Operation.Type))
         {
@@ -169,7 +182,58 @@ public class BinaryExpresion : Expresion
 
 }
 
+public class Function : Expresion
+{
+    public ICallable fuction;
 
+    public Token Id;
+
+    public List<Expresion> Arguments;
+
+    public override object Value
+    {
+        get
+        {
+            object[] args = new object[fuction.Arity];
+            for (int i = 0; i < args.Length; i++)
+            {
+                args[i] = Arguments[i].Value;
+            }
+            return fuction.Call(args);
+        }
+
+        protected set { }
+    }
+
+    public Function(Token id, List<Expresion> arguments, ICallable fuction)
+    {
+        Id = id;
+        Arguments = arguments;
+        this.fuction = fuction;
+        CheckType();
+    }
+
+    public override string ToString()
+    {
+        string text = Id.Text + "(";
+        for (int i = 0; i < Arguments.Count; i++)
+        {
+            if (i == Arguments.Count - 1) text += Arguments[^1];
+            else text += Arguments[i].ToString() + ",";
+        }
+        text += ")";
+
+        return text;
+    }
+
+    protected override void CheckType()
+    {
+        if (Value is int) Type = AstType.INT;
+        else if (Value is bool) Type = AstType.BOOL;
+        else if (Value is string) Type = AstType.COLOR;
+    }
+
+}
 
 
 
