@@ -21,7 +21,7 @@ public class RunCode
         BuiltInFunctions.RegisterFunction("Sum", new Sum());
 
     }
-    
+
 
     public RunCode(string text)
     {
@@ -29,12 +29,18 @@ public class RunCode
         ErrorManager.Restart();
         Lexer lexer = new Lexer(text);
         Parser parser = new Parser(lexer);
+        Interpreter interpreter = new Interpreter(parser);
+        interpreter.EvaluateProgram();
 
-        MessageBox.Show($"{parser.Tokens.Count}");        
+        foreach (var v in interpreter.CheckPoints)
+        {
+            MessageBox.Show(v.Key);
+        }
 
-        Program program = parser.ParseProgram();
-        ErrorManager.ShowErrors();
-        MessageBox.Show(program.ToString());
+
+        if (ErrorManager.HadError) ErrorManager.ShowErrors();
+        MessageBox.Show(interpreter.program.ToString());
+        
 
     }
 

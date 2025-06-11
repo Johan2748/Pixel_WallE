@@ -1,7 +1,7 @@
 public class Scope
 {
     private List<Label> labels;
-    private List<Var> variables;
+    public List<Var> variables { get; }
 
     public Scope()
     {
@@ -50,5 +50,4 @@ public class Scope
         }
         return expr;
     }
-
 }

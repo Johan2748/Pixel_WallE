@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Johan\\Desktop\\MatCom\\Pixel_WallE\\Pixel_WallE.csproj",
+      "projectUniqueName": "C:\\Users\\Johan\\Desktop\\MatCom\\Proyectos\\Pixel_WallE\\Pixel_WallE\\Pixel_WallE.csproj",
       "projectName": "Pixel_WallE",
-      "projectPath": "C:\\Users\\Johan\\Desktop\\MatCom\\Pixel_WallE\\Pixel_WallE.csproj",
+      "projectPath": "C:\\Users\\Johan\\Desktop\\MatCom\\Proyectos\\Pixel_WallE\\Pixel_WallE\\Pixel_WallE.csproj",
       "packagesPath": "C:\\Users\\Johan\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Johan\\Desktop\\MatCom\\Pixel_WallE\\obj\\",
+      "outputPath": "C:\\Users\\Johan\\Desktop\\MatCom\\Proyectos\\Pixel_WallE\\Pixel_WallE\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Johan\\AppData\\Roaming\\NuGet\\NuGet.Config"

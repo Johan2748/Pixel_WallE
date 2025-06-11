@@ -10,7 +10,7 @@ public abstract class AST
 
 public class Program : AST
 {
-    public List<AST?> Body;
+    public List<Statement?> Body { get; private set; }
 
     public Program()
     {

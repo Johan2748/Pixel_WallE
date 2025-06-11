@@ -1,13 +1,13 @@
 
 public abstract class Statement : AST
 {
-
+    public abstract Token Id { get; protected set; }
 }
 
 
 public class Label : Statement
 {
-    public Token Id { get; private set; }
+    public override Token Id { get; protected set; }
 
     public int Index;
 
@@ -26,9 +26,8 @@ public class Label : Statement
 
 public class Var : Statement
 {
-    public Token Id { get; private set; }
+    public override Token Id { get; protected set; }
     public Expresion Expresion;
-    public object? Value { get => Expresion.Value; protected set { } }
 
     public Var(Token id, Expresion expr)
     {
@@ -40,12 +39,16 @@ public class Var : Statement
 
     public override string ToString()
     {
-        return $"{Id.Text}({Value})";
+        return $"{Id.Text}({Expresion})";
     }
 }
 
+
+
+
 public class GoToStatement : Statement
 {
+    public override Token Id { get; protected set; }
     public Expresion Condition;
     public Label Label;
 
@@ -54,6 +57,7 @@ public class GoToStatement : Statement
         Label = label;
         Condition = expresion;
         Location = label.Location;
+        Id = new Token(TokenType.GOTO, "GoTo", Location);
     }
 
     public override string ToString()
@@ -64,7 +68,7 @@ public class GoToStatement : Statement
 
 public class InstructionCall : Statement
 {
-    public Token Id;
+    public override Token Id { get; protected set; }
     public List<Expresion> Arguments;
 
     public ICallable Function;

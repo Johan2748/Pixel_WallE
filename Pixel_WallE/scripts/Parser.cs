@@ -80,6 +80,7 @@ public class Parser
 
         while (!IsAtEnd())
         {
+            while(Match(TokenType.EO_LINE)){}
             program.Body.Add(ParseStatement());
         }
 
@@ -231,8 +232,7 @@ public class Parser
         try
         {
             Statement? stmt = null;
-            if (Match(TokenType.EO_LINE)) { }
-            else if (Match(TokenType.GOTO)) stmt = ParseGoTo();
+            if (Match(TokenType.GOTO)) stmt = ParseGoTo();
             else
             {
                 Eat(TokenType.ID, "Only assignment, call and label declaration can be used as a statement");
