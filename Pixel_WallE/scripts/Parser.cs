@@ -183,7 +183,7 @@ public class Parser
         {
             Token var = Previous();
             if (!Scope.ContainsVar(var)) throw new Error(var.Line, $"The name '{var.Text}' does not exist in the current context");
-            return Scope.GetVarExpresion(var);
+            return Scope.GetVar(var);
         }
         else if (Match(TokenType.LEFT_PAREN))
         {
@@ -206,7 +206,7 @@ public class Parser
         if (!BuiltInFunctions.IsFunction(id.Text)) throw new Error(id.Line, "Unknown function");
         var function = BuiltInFunctions.GetFunction(id.Text);
         Eat(TokenType.LEFT_PAREN, "Expected '(' before arguments");
-        List<Expresion> arguments = new();
+        List<Expresion> arguments = [];
         if (!CheckType(TokenType.RIGHT_PAREN))
         {
             do
@@ -262,7 +262,7 @@ public class Parser
         return label;
     }
 
-    public Var? ParseAssign()
+    public AssignStatement? ParseAssign()
     {
         Token id = Previous();
         Advance();
@@ -271,7 +271,7 @@ public class Parser
         {
             Var var = new(id, expr);
             Scope.AddVar(var);
-            return var;
+            return new AssignStatement(var,expr);
         }
         return null;
     }

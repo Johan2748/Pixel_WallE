@@ -1,14 +1,12 @@
 public class Interpreter
 {
     private int current;
-    private Parser parser;
     public Program program;
     public Dictionary<string, int> CheckPoints = [];
     public Dictionary<string, object> Variables = [];
 
     public Interpreter(Parser parser)
     {
-        this.parser = parser;
         program = parser.ParseProgram();
         SetCheckPoints();
     }
@@ -32,10 +30,11 @@ public class Interpreter
         {
             EvaluateSpawn();
 
-            for (current = 0; current < program.Body.Count; current++)
+            for (current = 1; current < program.Body.Count; current++)
             {
                 Statement stmt = program.Body[current]!;
                 if (stmt is InstructionCall) EvaluateInstruction(stmt);
+                else if (stmt is AssignStatement) EvaluateAssign(stmt);
                 else if (stmt is GoToStatement) EvaluateGoto(stmt);
             }
         }
@@ -43,25 +42,27 @@ public class Interpreter
         {
             ErrorManager.AddError(error);
         }
-        
 
-        
+
+
     }
 
 
+    // EVALUATE STATEMENTS
 
     private void EvaluateSpawn()
     {
         Statement start = program.Body[0]!;
         if (start.Id.Text != "Spawn") throw new Error(1, "The program should start whith a instruction Spawn(int,int)");
-        
+
     }
 
-    public void EvaluateVar(Statement statement)
+    public void EvaluateAssign(Statement statement)
     {
-        Var var = null!;
-        var = (Var)statement;
-    }    
+        AssignStatement ass = (AssignStatement)statement;
+        Variables[ass.Var.Id.Text] = EvaluateExpresion(ass.Expresion);
+        MessageBox.Show($"Ahora la var {ass.Var} vale {Variables[ass.Var.Id.Text]}");
+    }
 
     public void EvaluateInstruction(Statement statement)
     {
@@ -71,24 +72,92 @@ public class Interpreter
 
     public void EvaluateGoto(Statement statement)
     {
-        GoToStatement goTo = null!;
-        goTo = (GoToStatement)statement;
-        if ((bool)goTo.Condition.Value!)
+        GoToStatement goTo = (GoToStatement)statement;
+        if ((bool)EvaluateExpresion(goTo.Condition))
         {
             current = CheckPoints[goTo.Label.Id.Text];
-            MessageBox.Show($"Entro en el bucle {goTo.Label} y ahore nos vamos al lugar {current} ");
+            MessageBox.Show($"nos vamos desde el {goTo} al label {goTo.Label} en el {current}");
         }
     }
 
 
+    // EVALUATE EXPRESION
 
+    public object EvaluateExpresion(Expresion expresion)
+    {
+        if (expresion is BinaryExpresion) return EvaluateBinaryExpresion(expresion);
+        if (expresion is UnaryExpresion) return EvaluateUnaryExpresion(expresion);
+        if (expresion is Literal) return EvaluateLiteral(expresion);
+        if (expresion is Function) return EvaluateFunction(expresion);
+        else return EvaluateVar(expresion);
+    }
 
+    public object EvaluateBinaryExpresion(Expresion expresion)
+    {
+        BinaryExpresion b = (BinaryExpresion)expresion;
+        if (b.Operation.Type == TokenType.PLUS) return (int)EvaluateExpresion(b.Left) + (int)EvaluateExpresion(b.Right);
+        if (b.Operation.Type == TokenType.MINUS) return (int)EvaluateExpresion(b.Left) - (int)EvaluateExpresion(b.Right);
+        if (b.Operation.Type == TokenType.STAR) return (int)EvaluateExpresion(b.Left) * (int)EvaluateExpresion(b.Right);
+        if (b.Operation.Type == TokenType.SLASH) return (int)EvaluateExpresion(b.Left) / (int)EvaluateExpresion(b.Right);
+        if (b.Operation.Type == TokenType.MOD) return (int)EvaluateExpresion(b.Left) % (int)EvaluateExpresion(b.Right);
 
+        if (b.Operation.Type == TokenType.STAR_STAR)
+        {
+            int result = 1;
 
+            for (int i = 0; i < (int)EvaluateExpresion(b.Right); i++)
+            {
+                result *= (int)EvaluateExpresion(b.Left);
+            }
+        }
 
+        if (b.Operation.Type == TokenType.AND) return (bool)EvaluateExpresion(b.Left) && (bool)EvaluateExpresion(b.Right);
+        if (b.Operation.Type == TokenType.OR) return (bool)EvaluateExpresion(b.Left) || (bool)EvaluateExpresion(b.Right);
 
+        if (b.Operation.Type == TokenType.LESS) return (int)EvaluateExpresion(b.Left) < (int)EvaluateExpresion(b.Right);
+        if (b.Operation.Type == TokenType.LESS_EQUAL) return (int)EvaluateExpresion(b.Left) <= (int)EvaluateExpresion(b.Right);
+        if (b.Operation.Type == TokenType.GREATER) return (int)EvaluateExpresion(b.Left) > (int)EvaluateExpresion(b.Right);
+        if (b.Operation.Type == TokenType.GREATER_EQUAL) return (int)EvaluateExpresion(b.Left) >= (int)EvaluateExpresion(b.Right);
 
+        if (b.Operation.Type == TokenType.EQUAL_EQUAL) return EvaluateExpresion(b.Left) == EvaluateExpresion(b.Right);
+        if (b.Operation.Type == TokenType.NOT_EQUAL) return EvaluateExpresion(b.Left) != EvaluateExpresion(b.Right);
+        else return null!;
+    }
 
+    public object EvaluateUnaryExpresion(Expresion expresion)
+    {
+        UnaryExpresion u = (UnaryExpresion)expresion;
+        if (u.Operation.Type == TokenType.NOT) return !(bool)EvaluateExpresion(u.Expresion);
+        else if (u.Operation.Type == TokenType.MINUS) return -(int)EvaluateExpresion(u.Expresion);
+        else return null!;
+    }
+
+    public object EvaluateLiteral(Expresion expresion)
+    {
+        Literal l = (Literal)expresion;
+        if (expresion is Number) return int.Parse(l.Token.Text);
+        if (expresion is Bool) return bool.Parse(l.Token.Text);
+        else if (expresion is PixelColor) return l.Token.Text;
+        else return null!;
+    }
+
+    public object EvaluateFunction(Expresion expresion)
+    {
+        Function f = (Function)expresion;
+
+        object[] args = new object[f.fuction.Arity];
+        for (int i = 0; i < args.Length; i++)
+        {
+            args[i] = EvaluateExpresion(f.Arguments[i]);
+        }
+        return f.fuction.Call(args)!;
+    }
+
+    public object EvaluateVar(Expresion expresion)
+    {
+        Var v = (Var)expresion;
+        return Variables[v.Id.Text];
+    }
 
 
 

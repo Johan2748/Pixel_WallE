@@ -24,28 +24,6 @@ public class Label : Statement
 
 }
 
-public class Var : Statement
-{
-    public override Token Id { get; protected set; }
-    public Expresion Expresion;
-
-    public Var(Token id, Expresion expr)
-    {
-        Id = id;
-        Location = Id.Line;
-        Expresion = expr;
-        Type = expr.Type;
-    }
-
-    public override string ToString()
-    {
-        return $"{Id.Text}({Expresion})";
-    }
-}
-
-
-
-
 public class GoToStatement : Statement
 {
     public override Token Id { get; protected set; }
@@ -94,4 +72,25 @@ public class InstructionCall : Statement
         return text;
     }
 
+}
+
+public class AssignStatement : Statement
+{
+    public Var Var;
+    public Expresion Expresion;
+
+    public override Token Id { get; protected set; }
+
+    public AssignStatement(Var var, Expresion expresion)
+    {
+        Var = var;
+        Expresion = expresion;
+        Location = var.Location;
+        Id = new Token(TokenType.ASSIGN, "<-", Location);
+    }
+
+    public override string ToString()
+    {
+        return Var.ToString() + " <- " + Expresion.ToString();
+    }
 }

@@ -32,11 +32,7 @@ public class RunCode
         Interpreter interpreter = new Interpreter(parser);
         interpreter.EvaluateProgram();
 
-        foreach (var v in interpreter.CheckPoints)
-        {
-            MessageBox.Show(v.Key);
-        }
-
+        
 
         if (ErrorManager.HadError) ErrorManager.ShowErrors();
         MessageBox.Show(interpreter.program.ToString());

@@ -41,13 +41,13 @@ public class Scope
         return false;
     }
 
-    public Expresion GetVarExpresion(Token var)
+    public Var GetVar(Token var)
     {
-        Expresion expr = null!;
+        Var result = null!;
         for (int i = 0; i < variables.Count; i++)
         {
-            if (var.Text == variables[i].Id.Text) expr = variables[i].Expresion;
+            if (var.Text == variables[i].Id.Text) result = variables[i];
         }
-        return expr;
+        return result;
     }
 }

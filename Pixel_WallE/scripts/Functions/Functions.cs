@@ -5,6 +5,8 @@ public interface ICallable
 
     AstType[] Types { get; }
 
+    AstType ReturnType{ get; }
+
     bool CheckArguments(List<Expresion> arguments)
     {
         if (Arity != Types.Length) throw new Error(-1, "This function is poorly implemented");
@@ -26,6 +28,8 @@ public class Spawn : ICallable
 {
     public int Arity => 2;
 
+    public AstType ReturnType => AstType.NULL; 
+
     public AstType[] Types => [AstType.INT, AstType.INT];
 
     public object? Call(object[] arguments)
@@ -37,6 +41,8 @@ public class Spawn : ICallable
 public class ChangeColor : ICallable
 {
     public int Arity => 1;
+
+    public AstType ReturnType => AstType.NULL; 
 
     public AstType[] Types => [AstType.COLOR];
 
@@ -50,6 +56,8 @@ public class Size : ICallable
 {
     public int Arity => 1;
 
+    public AstType ReturnType => AstType.NULL; 
+
     public AstType[] Types => [AstType.INT];
 
     public object? Call(object[] arguments)
@@ -61,6 +69,8 @@ public class Size : ICallable
 public class DrawLine : ICallable
 {
     public int Arity => 3;
+
+    public AstType ReturnType => AstType.NULL; 
 
     public AstType[] Types => [AstType.INT, AstType.INT, AstType.INT];
 
@@ -74,6 +84,8 @@ public class DrawCircle : ICallable
 {
     public int Arity => 3;
 
+    public AstType ReturnType => AstType.NULL; 
+
     public AstType[] Types => [AstType.INT, AstType.INT, AstType.INT];
 
     public object? Call(object[] arguments)
@@ -86,6 +98,8 @@ public class DrawRectangle : ICallable
 {
     public int Arity => 5;
 
+    public AstType ReturnType => AstType.NULL; 
+
     public AstType[] Types => [AstType.INT, AstType.INT, AstType.INT, AstType.INT, AstType.INT];
 
     public object? Call(object[] arguments)
@@ -97,6 +111,8 @@ public class DrawRectangle : ICallable
 public class Fill : ICallable
 {
     public int Arity => 0;
+
+    public AstType ReturnType => AstType.NULL; 
 
     public AstType[] Types => [];
 
@@ -112,6 +128,8 @@ public class Sum : ICallable
 {
     public int Arity => 2;
 
+    public AstType ReturnType => AstType.NULL; 
+
     public AstType[] Types => [AstType.INT, AstType.INT];
 
     public object Call(object[] arguments)
@@ -123,6 +141,8 @@ public class Sum : ICallable
 public class GetActualX : ICallable
 {
     public int Arity => 0;
+
+    public AstType ReturnType => AstType.NULL; 
 
     public AstType[] Types => [];
 
@@ -136,6 +156,8 @@ public class GetActualY : ICallable
 {
     public int Arity => 0;
 
+    public AstType ReturnType => AstType.NULL; 
+
     public AstType[] Types => [];
 
     public object? Call(object[] arguments)
@@ -147,6 +169,8 @@ public class GetActualY : ICallable
 public class GetCanvasSize : ICallable
 {
     public int Arity => 0;
+
+    public AstType ReturnType => AstType.NULL; 
 
     public AstType[] Types => [];
 
@@ -160,6 +184,8 @@ public class GetColorCount : ICallable
 {
     public int Arity => 5;
 
+    public AstType ReturnType => AstType.NULL; 
+
     public AstType[] Types => [AstType.COLOR, AstType.INT, AstType.INT, AstType.INT, AstType.INT];
 
     public object? Call(object[] arguments)
@@ -171,6 +197,8 @@ public class GetColorCount : ICallable
 public class IsBrushColor : ICallable
 {
     public int Arity => 1;
+
+    public AstType ReturnType => AstType.NULL; 
 
     public AstType[] Types => [AstType.COLOR];
 
@@ -184,6 +212,8 @@ public class IsBrushSize : ICallable
 {
     public int Arity => 1;
 
+    public AstType ReturnType => AstType.NULL; 
+
     public AstType[] Types => [AstType.INT];
 
     public object? Call(object[] arguments)
@@ -195,6 +225,8 @@ public class IsBrushSize : ICallable
 public class IsCanvasColor : ICallable
 {
     public int Arity => 1;
+
+    public AstType ReturnType => AstType.NULL; 
 
     public AstType[] Types => [AstType.COLOR];
 
