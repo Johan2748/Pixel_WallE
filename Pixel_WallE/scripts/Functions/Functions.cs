@@ -56,6 +56,7 @@ public class ChangeColor : ICallable
 
         switch (color)
         {
+            case "Red" : Canvas.ActualColor = Color.Red; break;
             case "White": Canvas.ActualColor = Color.White; break;
             case "Blue": Canvas.ActualColor = Color.Blue; break;
             case "Green": Canvas.ActualColor = Color.Green; break;
@@ -63,7 +64,7 @@ public class ChangeColor : ICallable
             case "Orange": Canvas.ActualColor = Color.Orange; break;
             case "Purple": Canvas.ActualColor = Color.Purple; break;
             case "Black": Canvas.ActualColor = Color.Black; break;
-            case "Transparent": Canvas.ActualColor = Canvas.CellColors[Canvas.ActualX, Canvas.ActualY]; break;
+            case "Transparent": Canvas.ActualColor = Color.Transparent; break;
         }
 
         return null;
@@ -140,7 +141,13 @@ public class DrawCircle : ICallable
 
         
 
-        
+        for (int angle = 0; angle < 360; angle++)
+            {
+                double rad = angle * Math.PI / 180;
+                int xx = Canvas.ActualX + (int)(radius * Math.Cos(rad));
+                int yy = Canvas.ActualY + (int)(radius * Math.Sin(rad));
+            Canvas.SetCellColor(xx, yy, Canvas.ActualColor);
+            }
 
         
 

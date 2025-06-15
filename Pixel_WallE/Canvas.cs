@@ -133,7 +133,6 @@ class Canvas
     private void Click_Run(object? sender, EventArgs e)
     {
         _ = new RunCode(inputField.Text);
-        //SetCellColor(ActualX, ActualY, ActualColor);//////////////////
     }
 
 
@@ -193,6 +192,7 @@ class Canvas
     // PAINT CELLS
     public static void SetCellColor(int x, int y, Color color)
     {
+        if (color == Color.Transparent) return;
         if (x >= 0 && x < gridSize && y >= 0 && y < gridSize)
         {
             CellColors[x, y] = color;

@@ -86,6 +86,7 @@ public class Interpreter
     public void EvaluateGoto(Statement statement)
     {
         GoToStatement goTo = (GoToStatement)statement;
+        if (!CheckPoints.ContainsKey(goTo.Label.Id.Text)) throw new Error(goTo.Location, $"Label {goTo.Label.Id.Text} does not exist");
         if ((bool)EvaluateExpresion(goTo.Condition))
         {
             current = CheckPoints[goTo.Label.Id.Text];
@@ -112,7 +113,11 @@ public class Interpreter
         if (b.Operation.Type == TokenType.PLUS) return (int)EvaluateExpresion(b.Left) + (int)EvaluateExpresion(b.Right);
         if (b.Operation.Type == TokenType.MINUS) return (int)EvaluateExpresion(b.Left) - (int)EvaluateExpresion(b.Right);
         if (b.Operation.Type == TokenType.STAR) return (int)EvaluateExpresion(b.Left) * (int)EvaluateExpresion(b.Right);
-        if (b.Operation.Type == TokenType.SLASH) return (int)EvaluateExpresion(b.Left) / (int)EvaluateExpresion(b.Right);
+        if (b.Operation.Type == TokenType.SLASH)
+        {
+            if ((int)EvaluateExpresion(b.Right) == 0) throw new Error(expresion.Location, "You cannot divide by zero");
+            return (int)EvaluateExpresion(b.Left) / (int)EvaluateExpresion(b.Right);
+        }
         if (b.Operation.Type == TokenType.MOD) return (int)EvaluateExpresion(b.Left) % (int)EvaluateExpresion(b.Right);
 
         if (b.Operation.Type == TokenType.STAR_STAR)
