@@ -18,7 +18,6 @@ public class RunCode
         BuiltInFunctions.RegisterFunction("IsBrushColor", new IsBrushColor());
         BuiltInFunctions.RegisterFunction("IsBrushSize", new IsBrushSize());
         BuiltInFunctions.RegisterFunction("IsCanvasColor", new IsCanvasColor());
-        BuiltInFunctions.RegisterFunction("Sum", new Sum());
 
     }
 
@@ -31,12 +30,9 @@ public class RunCode
         Parser parser = new Parser(lexer);
         Interpreter interpreter = new Interpreter(parser);
         interpreter.EvaluateProgram();
-
         
-
         if (ErrorManager.HadError) ErrorManager.ShowErrors();
-        MessageBox.Show(interpreter.program.ToString());
-        
+                
 
     }
 

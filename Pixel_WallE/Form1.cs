@@ -12,34 +12,11 @@ public partial class MainForm : Form
         Canvas canvas = new();
 
 
-        this.MouseDown += (sender, e) =>
-        {
-            if (!canvas.inputField.Bounds.Contains(e.Location))
-            {
-                MessageBox.Show("Escribiste :\n" + canvas.inputField.Text);
-                new RunCode(canvas.inputField.Text);
-            }
-        };
+        Controls.Add(canvas.LeftPanel);
+        Controls.Add(Canvas.canvas);
+        Controls.Add(canvas.resize);
 
-
-
-
-        Controls.Add(canvas.inputField);
-        Controls.Add(canvas.runButton);
-        Controls.Add(canvas.canvas);
     }
-
-
-    
-
-
-
-
-
-
-
-
-
 
 
 

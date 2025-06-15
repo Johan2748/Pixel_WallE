@@ -81,7 +81,7 @@ public class Parser
         while (!IsAtEnd())
         {
             while(Match(TokenType.EO_LINE)){}
-            program.Body.Add(ParseStatement());
+            if(!IsAtEnd())program.Body.Add(ParseStatement());
         }
 
         return program;

@@ -29,5 +29,15 @@ public class UnaryExprError : Error
 
 public class BinOpError : Error
 {
-    public BinOpError(Expresion left, Token op, Expresion right) : base(op.Line,$"Operator '{op.Text}' cannot be applied to operands of type '{left.Type}' and '{right.Type}'") { }
+    public BinOpError(Expresion left, Token op, Expresion right) : base(op.Line, $"Operator '{op.Text}' cannot be applied to operands of type '{left.Type}' and '{right.Type}'") { }
+}
+
+public class PoorlyImplementedFunctionError : Error
+{
+    public PoorlyImplementedFunctionError(int line, ICallable function) : base(line, $"This function {function} is poorly implemented") { }
+}
+
+public class IndexOutOfRangeError : Error
+{
+    public IndexOutOfRangeError() : base(-1, "Index out of range") { }
 }

@@ -44,7 +44,11 @@ public class Bool : Literal
 
 public class PixelColor : Literal
 {
-    protected override void CheckType() => Type = AstType.COLOR;
+    protected override void CheckType()
+    {
+        if (!Check.IsValidColor(Token.Text)) throw new Error(Location, "Invalid color");
+        Type = AstType.COLOR;
+    }
 
     public PixelColor(Token token)
     {
@@ -154,17 +158,17 @@ public class Var : Expresion
 
 public class Function : Expresion
 {
-    public ICallable fuction;
+    public ICallable function;
 
     public Token Id;
 
     public List<Expresion> Arguments;
 
-    public Function(Token id, List<Expresion> arguments, ICallable fuction)
+    public Function(Token id, List<Expresion> arguments, ICallable function)
     {
         Id = id;
         Arguments = arguments;
-        this.fuction = fuction;
+        this.function = function;
         CheckType();
     }
 
@@ -183,7 +187,7 @@ public class Function : Expresion
 
     protected override void CheckType()
     {
-        Type = fuction.ReturnType;
+        Type = function.ReturnType;
     }
 
 }

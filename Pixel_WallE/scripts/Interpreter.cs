@@ -1,6 +1,7 @@
 public class Interpreter
 {
     private int current;
+    private int depth = 0;
     public Program program;
     public Dictionary<string, int> CheckPoints = [];
     public Dictionary<string, object> Variables = [];
@@ -42,9 +43,6 @@ public class Interpreter
         {
             ErrorManager.AddError(error);
         }
-
-
-
     }
 
 
@@ -55,20 +53,35 @@ public class Interpreter
         Statement start = program.Body[0]!;
         if (start.Id.Text != "Spawn") throw new Error(1, "The program should start whith a instruction Spawn(int,int)");
 
+        InstructionCall c = (InstructionCall)start;
+        object[] args = new object[c.Function.Arity];
+        for (int i = 0; i < args.Length; i++)
+        {
+            args[i] = EvaluateExpresion(c.Arguments[i]);
+        }
+
+        c.Function.Call(args);
+    }
+
+    public void EvaluateInstruction(Statement statement)
+    {
+        InstructionCall c = (InstructionCall)statement;
+        if (c.Id.Text == "Spawn") throw new Error(c.Location, "Instruction Spawn(int,int) should be at the beggining");
+
+        object[] args = new object[c.Function.Arity];
+        for (int i = 0; i < args.Length; i++)
+        {
+            args[i] = EvaluateExpresion(c.Arguments[i]);
+        }
+        
+        c.Function.Call(args);
     }
 
     public void EvaluateAssign(Statement statement)
     {
         AssignStatement ass = (AssignStatement)statement;
         Variables[ass.Var.Id.Text] = EvaluateExpresion(ass.Expresion);
-        MessageBox.Show($"Ahora la var {ass.Var} vale {Variables[ass.Var.Id.Text]}");
     }
-
-    public void EvaluateInstruction(Statement statement)
-    {
-
-    }
-
 
     public void EvaluateGoto(Statement statement)
     {
@@ -76,8 +89,9 @@ public class Interpreter
         if ((bool)EvaluateExpresion(goTo.Condition))
         {
             current = CheckPoints[goTo.Label.Id.Text];
-            MessageBox.Show($"nos vamos desde el {goTo} al label {goTo.Label} en el {current}");
+            depth++;
         }
+        if (depth > 10000) throw new Error(goTo.Location, "StackOverflow");
     }
 
 
@@ -142,15 +156,24 @@ public class Interpreter
     }
 
     public object EvaluateFunction(Expresion expresion)
+
     {
         Function f = (Function)expresion;
 
-        object[] args = new object[f.fuction.Arity];
+        object[] args = new object[f.function.Arity];
         for (int i = 0; i < args.Length; i++)
         {
             args[i] = EvaluateExpresion(f.Arguments[i]);
         }
-        return f.fuction.Call(args)!;
+
+        object result = f.function.Call(args)!;
+
+        if (result is int && f.function.ReturnType != AstType.INT) throw new PoorlyImplementedFunctionError(f.Location, f.function);
+        if (result is bool && f.function.ReturnType != AstType.BOOL) throw new PoorlyImplementedFunctionError(f.Location, f.function);
+        if (result is string && f.function.ReturnType != AstType.COLOR) throw new PoorlyImplementedFunctionError(f.Location, f.function);
+        
+
+        return result;
     }
 
     public object EvaluateVar(Expresion expresion)

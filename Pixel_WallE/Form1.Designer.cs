@@ -30,7 +30,7 @@ partial class MainForm
     {
         this.components = new System.ComponentModel.Container();
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(1080, 720);
+        this.ClientSize = new System.Drawing.Size(1920,1080);
         this.Text = "Pixel Wall-E";        
     }
 

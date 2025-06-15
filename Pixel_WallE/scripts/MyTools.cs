@@ -32,6 +32,12 @@ namespace MyTools
             return type == TokenType.PLUS || type == TokenType.MINUS || type == TokenType.MOD || type == TokenType.SLASH || type == TokenType.STAR || type == TokenType.STAR_STAR;
         }
 
+        public static bool IsValidColor(string color)
+        {
+            color = color[1..^1];
+            return color == "Red" || color == "Blue" || color == "Green" || color == "Yellow" || color == "Orange" || color == "Purple" || color == "Black" || color == "White" || color == "Transparent";
+        }
+
     }
 
 
