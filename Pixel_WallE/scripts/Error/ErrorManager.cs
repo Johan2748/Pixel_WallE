@@ -15,8 +15,8 @@ public static class ErrorManager
         foreach (Error error in errors)
         {
             errorList += error.GetReport();
-        }        
-        MessageBox.Show(errorList);
+        }
+        MessageBox.Show(errorList, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
     }
 
     public static void Restart()

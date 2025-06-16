@@ -14,8 +14,11 @@ public partial class MainForm : Form
 
         Controls.Add(canvas.LeftPanel);
         Controls.Add(Canvas.canvas);
-        Controls.Add(canvas.resize);
-
+        Controls.Add(canvas.resizeButton);
+        Controls.Add(canvas.saveButton);
+        Controls.Add(canvas.saveText);
+        Controls.Add(canvas.loadButton);
+        Controls.Add(canvas.loadText);
     }
 
 

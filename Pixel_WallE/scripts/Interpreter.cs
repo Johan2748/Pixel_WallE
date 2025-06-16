@@ -115,7 +115,7 @@ public class Interpreter
         if (b.Operation.Type == TokenType.STAR) return (int)EvaluateExpresion(b.Left) * (int)EvaluateExpresion(b.Right);
         if (b.Operation.Type == TokenType.SLASH)
         {
-            if ((int)EvaluateExpresion(b.Right) == 0) throw new Error(expresion.Location, "You cannot divide by zero");
+            if ((int)EvaluateExpresion(b.Right) == 0) throw new Error(b.Location, "You cannot divide by zero");
             return (int)EvaluateExpresion(b.Left) / (int)EvaluateExpresion(b.Right);
         }
         if (b.Operation.Type == TokenType.MOD) return (int)EvaluateExpresion(b.Left) % (int)EvaluateExpresion(b.Right);
@@ -128,6 +128,7 @@ public class Interpreter
             {
                 result *= (int)EvaluateExpresion(b.Left);
             }
+            return result;
         }
 
         if (b.Operation.Type == TokenType.AND) return (bool)EvaluateExpresion(b.Left) && (bool)EvaluateExpresion(b.Right);

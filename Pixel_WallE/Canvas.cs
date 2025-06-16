@@ -12,10 +12,9 @@ class Canvas
 
 
     // Accessible properties [WALL-E STATE]
-
     public static int ActualX { get; set; }
     public static int ActualY { get; set; }
-    public static int BrushSize{ get; set; }
+    public static int BrushSize { get; set; }
     public static Color[,] CellColors = null!;
     public static Color ActualColor { get; set; }
 
@@ -29,8 +28,13 @@ class Canvas
 
 
 
+    // Right side controls
 
-    public Button resize;
+    public Button resizeButton { get; private set; }
+    public Button saveButton { get; private set; }
+    public TextBox saveText { get; private set; }
+    public Button loadButton { get; private set; }
+    public TextBox loadText { get; private set; }
 
 
 
@@ -39,7 +43,7 @@ class Canvas
     public static PictureBox canvas = new();
     private static Bitmap? bitmap;
 
-    
+
 
 
 
@@ -83,19 +87,63 @@ class Canvas
 
 
 
-        // Size Button
-        resize = new()
+
+        // RIGHT SIDE
+
+        // SIZE BUTTON
+        resizeButton = new()
         {
             Text = "Size",
-            Location = new Point(1600, 30),
+            Location = new Point(1550, 30),
             Size = new System.Drawing.Size(120, 40)
         };
 
+        ContextMenuStrip contextMenu = new();
+
+        contextMenu.Items.Add("50", null, (s, e) => { gridSize = 50; PaintGrid(); });
+        contextMenu.Items.Add("100", null, (s, e) => { gridSize = 100; PaintGrid(); });
+        contextMenu.Items.Add("150", null, (s, e) => { gridSize = 150; PaintGrid(); });
+        contextMenu.Items.Add("300", null, (s, e) => { gridSize = 300; PaintGrid(); });
+
+        resizeButton.Click += (s, e) => contextMenu.Show(resizeButton, new Point(0, resizeButton.Height));
+
+        // SAVE BUTTON
+
+        saveButton = new()
+        {
+            Text = "Save",
+            Location = new Point(1550, 600),
+            Size = new System.Drawing.Size(120,40)
+        };
+
+        saveText = new()
+        {
+            Location = new Point(saveButton.Left, saveButton.Bottom),
+            Size = new System.Drawing.Size(120, 40),
+            Multiline = false
+        };
+
+        saveButton.Click += (s, e) => { Files.SaveFile(saveText.Text, inputField.Text); };
 
 
 
+        // LOAD BUTTON
 
+        loadButton = new()
+        {
+            Text = "Load",
+            Location = new Point(1550, 700),
+            Size = new System.Drawing.Size(120,40)
+        };
 
+        loadText = new()
+        {
+            Location = new Point(loadButton.Left, loadButton.Bottom),
+            Size = new System.Drawing.Size(120, 40),
+            Multiline = false
+        };
+
+        loadButton.Click += (s, e) => { inputField.Text = Files.LoadFile(loadText.Text); };
 
 
 
@@ -107,23 +155,13 @@ class Canvas
             BackColor = Color.White,
             BorderStyle = BorderStyle.FixedSingle
         };
-
-
         PaintGrid();
 
-        ContextMenuStrip contextMenu = new();
-
-        contextMenu.Items.Add("50", null, (s, e) => { gridSize = 50; PaintGrid(); });
-        contextMenu.Items.Add("100", null, (s, e) => { gridSize = 100; PaintGrid(); });
-        contextMenu.Items.Add("150", null, (s, e) => { gridSize = 150; PaintGrid(); });
-        contextMenu.Items.Add("300", null, (s, e) => { gridSize = 300; PaintGrid(); });
-
-
-        resize.Click += (s, e) => contextMenu.Show(resize, new Point(0, resize.Height));
 
 
         LeftPanel.Controls.Add(runButton);
         LeftPanel.Controls.Add(inputField);
+
 
     }
 
@@ -207,7 +245,7 @@ class Canvas
 
         using (Graphics g = Graphics.FromImage(bitmap))
         {
-            Brush brush = new SolidBrush(CellColors[x,y]); 
+            Brush brush = new SolidBrush(CellColors[x, y]);
             g.FillRectangle(brush, x * cellSize, y * cellSize, BrushSize * cellSize, BrushSize * cellSize);
 
 
@@ -215,5 +253,19 @@ class Canvas
 
         canvas.Invalidate();
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
