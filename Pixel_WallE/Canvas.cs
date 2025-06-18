@@ -1,5 +1,6 @@
 
 using System.Dynamic;
+using System.Text;
 using ICSharpCode.TextEditor;
 
 class Canvas
@@ -32,9 +33,7 @@ class Canvas
 
     public Button resizeButton { get; private set; }
     public Button saveButton { get; private set; }
-    public TextBox saveText { get; private set; }
     public Button loadButton { get; private set; }
-    public TextBox loadText { get; private set; }
 
 
 
@@ -113,17 +112,10 @@ class Canvas
         {
             Text = "Save",
             Location = new Point(1550, 600),
-            Size = new System.Drawing.Size(120,40)
+            Size = new System.Drawing.Size(120, 40)
         };
 
-        saveText = new()
-        {
-            Location = new Point(saveButton.Left, saveButton.Bottom),
-            Size = new System.Drawing.Size(120, 40),
-            Multiline = false
-        };
-
-        saveButton.Click += (s, e) => { Files.SaveFile(saveText.Text, inputField.Text); };
+        saveButton.Click += (s, e) => { Files.SaveFile(inputField.Text); };
 
 
 
@@ -133,18 +125,10 @@ class Canvas
         {
             Text = "Load",
             Location = new Point(1550, 700),
-            Size = new System.Drawing.Size(120,40)
+            Size = new System.Drawing.Size(120, 40)
         };
 
-        loadText = new()
-        {
-            Location = new Point(loadButton.Left, loadButton.Bottom),
-            Size = new System.Drawing.Size(120, 40),
-            Multiline = false
-        };
-
-        loadButton.Click += (s, e) => { inputField.Text = Files.LoadFile(loadText.Text); };
-
+        loadButton.Click += (s, e) => { inputField.Text = Files.LoadFile(); };
 
 
         // VISUAL CANVAS
@@ -253,13 +237,6 @@ class Canvas
 
         canvas.Invalidate();
     }
-
-
-
-
-
-
-
 
 
 

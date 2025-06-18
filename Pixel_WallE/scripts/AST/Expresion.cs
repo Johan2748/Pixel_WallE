@@ -131,6 +131,7 @@ public class BinaryExpresion : Expresion
             if (Left.Type != AstType.INT || Right.Type != AstType.INT) throw new BinOpError(Left, Operation, Right);
             Type = AstType.BOOL;
         }
+        if (Operation.Type == TokenType.EQUAL_EQUAL || Operation.Type == TokenType.NOT_EQUAL) Type = AstType.BOOL;
     }
 
 }

@@ -1,60 +1,43 @@
 public static class Files
 {
 
-    public static string path = Directory.GetCurrentDirectory();
-    private static bool beenSaved = false;
+    private static string path = Directory.GetCurrentDirectory() + @"\Saved Files";
 
 
-    public static string[]? Archives
+
+    public static void SaveFile(string text)
     {
-        get
-        { try
-            {
-                return Directory.GetFiles(path, "*.pw");
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("There are not any file saved yet", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-            
-        }
-    }
+        Directory.CreateDirectory(path);
 
-
-    public static void SaveFile(string name, string text)
-    {
-        if (!beenSaved)
+        using var dialog = new SaveFileDialog()
         {
-            beenSaved = true;
-            path += @"\Saved Files";
-            Directory.CreateDirectory(path);
-        }
+            Filter = "PW Files (*.pw)|*.pw",
+            InitialDirectory = path
+        };
 
-        TextWriter archive = new StreamWriter(path + $@"\{name}.pw");
-        archive.WriteLine(text);
-        archive.Close();
+        if (dialog.ShowDialog() == DialogResult.OK) File.WriteAllText(dialog.FileName, text);
+        
     }
 
 
 
-    public static string LoadFile(string name)
+    public static string LoadFile()
     {
-        if (Archives is null)  return ""; 
-        else
+
+        string text = "";
+
+        using var dialog = new OpenFileDialog
         {
-            if (Archives.Contains(@$"{name}.pw"))
-            {
-                TextReader archive = new StreamReader(path + @$"{name}.pw");
-                string text = archive.ReadToEnd();
-                archive.Close();
-                return text;
-            }
-            else {MessageBox.Show("There are not any file whit that name", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); return ""; }
+            Filter = "PW Files (*.pw)|*.pw",
+            InitialDirectory = path
+        };
+
+        if (dialog.ShowDialog() == DialogResult.OK)
+        {
+            text = File.ReadAllText(dialog.FileName);
+
         }
+        return text; 
     }
-
-
-
-
+    
 }

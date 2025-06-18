@@ -139,8 +139,26 @@ public class Interpreter
         if (b.Operation.Type == TokenType.GREATER) return (int)EvaluateExpresion(b.Left) > (int)EvaluateExpresion(b.Right);
         if (b.Operation.Type == TokenType.GREATER_EQUAL) return (int)EvaluateExpresion(b.Left) >= (int)EvaluateExpresion(b.Right);
 
-        if (b.Operation.Type == TokenType.EQUAL_EQUAL) return EvaluateExpresion(b.Left) == EvaluateExpresion(b.Right);
-        if (b.Operation.Type == TokenType.NOT_EQUAL) return EvaluateExpresion(b.Left) != EvaluateExpresion(b.Right);
+        if (b.Operation.Type == TokenType.EQUAL_EQUAL)
+        {
+            object left = EvaluateExpresion(b.Left);
+            object right = EvaluateExpresion(b.Right);
+
+            if (left is int && right is int) return (int)left == (int)right;
+            if (left is bool && right is bool) return (bool)left == (bool)right;
+            if (left is string && right is string) return left.ToString() == right.ToString(); 
+            return false;
+        }
+        if (b.Operation.Type == TokenType.NOT_EQUAL)
+        {
+            object left = EvaluateExpresion(b.Left);
+            object right = EvaluateExpresion(b.Right);
+
+            if (left is int && right is int) return (int)left != (int)right;
+            if (left is bool && right is bool) return (bool)left != (bool)right;
+            if (left is string && right is string) return left.ToString() != right.ToString(); 
+            return false;
+        }
         else return null!;
     }
 
@@ -185,6 +203,7 @@ public class Interpreter
     public object EvaluateVar(Expresion expresion)
     {
         Var v = (Var)expresion;
+        if (!Variables.ContainsKey(v.Id.Text)) throw new Error(v.Location, $"The name {v.Id.Text} does not exist in the current context");
         return Variables[v.Id.Text];
     }
 

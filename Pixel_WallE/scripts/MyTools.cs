@@ -24,7 +24,7 @@ namespace MyTools
 
         public static bool IsComparerOp(TokenType type)
         {
-            return type == TokenType.LESS || type == TokenType.LESS_EQUAL || type == TokenType.GREATER || type == TokenType.GREATER_EQUAL || type == TokenType.EQUAL_EQUAL || type == TokenType.NOT_EQUAL;
+            return type == TokenType.LESS || type == TokenType.LESS_EQUAL || type == TokenType.GREATER || type == TokenType.GREATER_EQUAL;
         }
 
         public static bool IsArithmeticOp(TokenType type)
