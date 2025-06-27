@@ -32,6 +32,7 @@ class Canvas
     // Right side controls
 
     public Button resizeButton { get; private set; }
+    public Button cleanButton { get; private set; }
     public Button saveButton { get; private set; }
     public Button loadButton { get; private set; }
 
@@ -105,6 +106,17 @@ class Canvas
         contextMenu.Items.Add("300", null, (s, e) => { gridSize = 300; PaintGrid(); });
 
         resizeButton.Click += (s, e) => contextMenu.Show(resizeButton, new Point(0, resizeButton.Height));
+
+        // CLEAN BUTTON
+
+        cleanButton = new()
+        {
+            Text = "Clean",
+            Location = new Point(1750, 30),
+            Size = new System.Drawing.Size(120, 40)
+        };
+
+        cleanButton.Click += (s, e) => { PaintGrid(); BrushSize = 1; };
 
         // SAVE BUTTON
 

@@ -17,6 +17,7 @@ public partial class MainForm : Form
         Controls.Add(canvas.resizeButton);
         Controls.Add(canvas.saveButton);
         Controls.Add(canvas.loadButton);
+        Controls.Add(canvas.cleanButton);
     }
 
 

@@ -92,7 +92,7 @@ public class DrawLine : ICallable
 {
     public int Arity => 3;
 
-    public AstType ReturnType => AstType.NULL; 
+    public AstType ReturnType => AstType.NULL;
 
     public AstType[] Types => [AstType.INT, AstType.INT, AstType.INT];
 
@@ -105,57 +105,96 @@ public class DrawLine : ICallable
         if (x > 1 || x < -1) throw new Error(-1, "Invalid direction");
         if (y > 1 || y < -1) throw new Error(-1, "Invalid direction");
 
-        for (int i = 0; i < length ; i++)
+        for (int i = 0; i < length; i++)
         {
             Canvas.SetCellColor(Canvas.ActualX, Canvas.ActualY, Canvas.ActualColor);
             if (Canvas.ActualX + x >= Canvas.gridSize || Canvas.ActualY + y >= Canvas.gridSize || Canvas.ActualX + x < 0 || Canvas.ActualY + y < 0) throw new IndexOutOfRangeError();
             Canvas.ActualX += x;
             Canvas.ActualY += y;
         }
-  
+
         return null;
     }
 }
-//////////////////////////////////////////////////////
+
 public class DrawCircle : ICallable
 {
     public int Arity => 3;
 
-    public AstType ReturnType => AstType.NULL; 
+    public AstType ReturnType => AstType.NULL;
 
     public AstType[] Types => [AstType.INT, AstType.INT, AstType.INT];
 
     public object? Call(object[] arguments)
     {
-        int x = (int)arguments[0];
-        int y = (int)arguments[1];
+        int dir_x = (int)arguments[0];
+        int dir_y = (int)arguments[1];
         int radius = (int)arguments[2];
 
-        if (x > 1 || x < -1) throw new Error(-1, "Invalid direction");
-        if (y > 1 || y < -1) throw new Error(-1, "Invalid direction");
+        if (dir_x > 1 || dir_x < -1) throw new Error(-1, "Invalid direction");
+        if (dir_y > 1 || dir_y < -1) throw new Error(-1, "Invalid direction");
         if (radius < 1) throw new Error(-1, "Radius cannot be less than 1");
 
-        if (Canvas.ActualX + x * radius >= Canvas.gridSize || Canvas.ActualY + y * radius >= Canvas.gridSize || Canvas.ActualX + x * radius < 0 || Canvas.ActualY + y * radius < 0) throw new IndexOutOfRangeError();
-        Canvas.ActualX += x * radius;
-        Canvas.ActualY += y * radius;
 
-        
+        int centerX = Canvas.ActualX + dir_x * radius;
+        int centerY = Canvas.ActualY + dir_y * radius;
 
-        for (int angle = 0; angle < 360; angle++)
+        if (centerX >= Canvas.gridSize || centerY >= Canvas.gridSize || centerX < 0 || centerY < 0) throw new IndexOutOfRangeError();
+        Canvas.ActualX += dir_x * radius;
+        Canvas.ActualY += dir_y * radius;
+
+
+        int x = radius;
+        int y = 0;
+        int err = 0;
+
+        while (x >= y)
+        {
+            PlotCirclePoints(centerX, centerY, x, y);
+
+            if (err <= 0)
             {
-                double rad = angle * Math.PI / 180;
-                int xx = Canvas.ActualX + (int)(radius * Math.Cos(rad));
-                int yy = Canvas.ActualY + (int)(radius * Math.Sin(rad));
-            Canvas.SetCellColor(xx, yy, Canvas.ActualColor);
+                y += 1;
+                err += 2 * y + 1;
             }
-
-        
+            if (err > 0)
+            {
+                x -= 1;
+                err -= 2 * x + 1;
+            }
+        }
 
         return null;
 
     }
+    
+    private void PlotCirclePoints(int cx, int cy, int x, int y)
+    {
+        // Dibujar en los 8 octantes (simetría circular)
+        SetPixelSafely(cx + x, cy + y);
+        SetPixelSafely(cx - x, cy + y);
+        SetPixelSafely(cx + x, cy - y);
+        SetPixelSafely(cx - x, cy - y);
+        SetPixelSafely(cx + y, cy + x);
+        SetPixelSafely(cx - y, cy + x);
+        SetPixelSafely(cx + y, cy - x);
+        SetPixelSafely(cx - y, cy - x);
+    }
+
+    private void SetPixelSafely(int x, int y)
+    {
+        if (x >= 0 && x < Canvas.gridSize && y >= 0 && y < Canvas.gridSize)
+        {
+            Canvas.SetCellColor(x, y, Canvas.ActualColor);
+        }
+    }
+
+
+
+
+
 }
-/////////////////////////////////////////////////////
+
 public class DrawRectangle : ICallable
 {
     public int Arity => 5;
@@ -210,28 +249,45 @@ public class Fill : ICallable
 
     public object? Call(object[] arguments)
     {
-        int x = Canvas.ActualX;
-        int y = Canvas.ActualY;
+        int startX = Canvas.ActualX;
+        int startY = Canvas.ActualY;
+        Color newColor = Canvas.ActualColor;
+        Color targetColor = Canvas.CellColors[startX, startY];
 
-        if (Canvas.CellColors[x, y] == Canvas.ActualColor) return null;
+        if (targetColor == newColor) return null;
 
-        FillCanvas(x, y, Canvas.CellColors[x, y]);
+        Queue<(int x, int y)> queue = new();
+        queue.Enqueue((startX, startY));
+
+        while (queue.Count > 0)
+        {
+            var (x, y) = queue.Dequeue();
+
+            if (Canvas.CellColors[x, y] != targetColor) continue;
+
+            Canvas.SetCellColor(x, y, newColor);
+
+            ExploreNeighbor(queue, x - 1, y, targetColor);
+            ExploreNeighbor(queue, x + 1, y, targetColor);
+            ExploreNeighbor(queue, x, y - 1, targetColor);
+            ExploreNeighbor(queue, x, y + 1, targetColor);
+
+        }
 
 
         return null;
     }
 
 
-    public void FillCanvas(int x, int y, Color expected_color)
+    private void ExploreNeighbor(Queue<(int x, int y)> queue, int x, int y, Color targetColor)
     {
-        if (Canvas.CellColors[x, y] != expected_color) return;
-
-        Canvas.SetCellColor(x, y, Canvas.ActualColor);
-
-        if (x > 0) FillCanvas(x - 1, y, expected_color);
-        if (x < Canvas.gridSize - 1) FillCanvas(x + 1, y, expected_color);
-        if (y > 0) FillCanvas(x, y - 1, expected_color);
-        if (y < Canvas.gridSize - 1) FillCanvas(x, y + 1, expected_color);
+        // Verificar límites y color
+        if (x >= 0 && x < Canvas.gridSize && 
+            y >= 0 && y < Canvas.gridSize && 
+            Canvas.CellColors[x, y] == targetColor)
+        {
+            queue.Enqueue((x, y));
+        }
     }
 }
 
