@@ -2,9 +2,9 @@ public class Interpreter
 {
     private int current;
     private int depth = 0;
-    public Program program;
-    public Dictionary<string, int> CheckPoints = [];
-    public Dictionary<string, object> Variables = [];
+    private Program program;
+    private Dictionary<string, int> CheckPoints = [];
+    private Dictionary<string, object> Variables = [];
 
     public Interpreter(Parser parser)
     {
@@ -60,10 +60,10 @@ public class Interpreter
             args[i] = EvaluateExpresion(c.Arguments[i]);
         }
 
-        c.Function.Call(args);
+        c.Function.Call(args, c.Location);
     }
 
-    public void EvaluateInstruction(Statement statement)
+    private void EvaluateInstruction(Statement statement)
     {
         InstructionCall c = (InstructionCall)statement;
         if (c.Id.Text == "Spawn") throw new Error(c.Location, "Instruction Spawn(int,int) should be at the beggining");
@@ -74,16 +74,16 @@ public class Interpreter
             args[i] = EvaluateExpresion(c.Arguments[i]);
         }
         
-        c.Function.Call(args);
+        c.Function.Call(args, c.Location);
     }
 
-    public void EvaluateAssign(Statement statement)
+    private void EvaluateAssign(Statement statement)
     {
         AssignStatement ass = (AssignStatement)statement;
         Variables[ass.Var.Id.Text] = EvaluateExpresion(ass.Expresion);
     }
 
-    public void EvaluateGoto(Statement statement)
+    private void EvaluateGoto(Statement statement)
     {
         GoToStatement goTo = (GoToStatement)statement;
         if (!CheckPoints.ContainsKey(goTo.Label.Id.Text)) throw new Error(goTo.Location, $"Label {goTo.Label.Id.Text} does not exist");
@@ -98,7 +98,7 @@ public class Interpreter
 
     // EVALUATE EXPRESION
 
-    public object EvaluateExpresion(Expresion expresion)
+    private object EvaluateExpresion(Expresion expresion)
     {
         if (expresion is BinaryExpresion) return EvaluateBinaryExpresion(expresion);
         if (expresion is UnaryExpresion) return EvaluateUnaryExpresion(expresion);
@@ -107,7 +107,7 @@ public class Interpreter
         else return EvaluateVar(expresion);
     }
 
-    public object EvaluateBinaryExpresion(Expresion expresion)
+    private object EvaluateBinaryExpresion(Expresion expresion)
     {
         BinaryExpresion b = (BinaryExpresion)expresion;
         if (b.Operation.Type == TokenType.PLUS) return (int)EvaluateExpresion(b.Left) + (int)EvaluateExpresion(b.Right);
@@ -162,7 +162,7 @@ public class Interpreter
         else return null!;
     }
 
-    public object EvaluateUnaryExpresion(Expresion expresion)
+    private object EvaluateUnaryExpresion(Expresion expresion)
     {
         UnaryExpresion u = (UnaryExpresion)expresion;
         if (u.Operation.Type == TokenType.NOT) return !(bool)EvaluateExpresion(u.Expresion);
@@ -170,7 +170,7 @@ public class Interpreter
         else return null!;
     }
 
-    public object EvaluateLiteral(Expresion expresion)
+    private object EvaluateLiteral(Expresion expresion)
     {
         Literal l = (Literal)expresion;
         if (expresion is Number) return int.Parse(l.Token.Text);
@@ -179,7 +179,7 @@ public class Interpreter
         else return null!;
     }
 
-    public object EvaluateFunction(Expresion expresion)
+    private object EvaluateFunction(Expresion expresion)
 
     {
         Function f = (Function)expresion;
@@ -190,27 +190,21 @@ public class Interpreter
             args[i] = EvaluateExpresion(f.Arguments[i]);
         }
 
-        object result = f.function.Call(args)!;
+        object result = f.function.Call(args, f.Location)!;
 
-        if (result is int && f.function.ReturnType != AstType.INT) throw new PoorlyImplementedFunctionError(f.Location, f.function);
-        if (result is bool && f.function.ReturnType != AstType.BOOL) throw new PoorlyImplementedFunctionError(f.Location, f.function);
-        if (result is string && f.function.ReturnType != AstType.COLOR) throw new PoorlyImplementedFunctionError(f.Location, f.function);
+        if (result is int && f.function.ReturnType != AstType.INT) throw new PoorlyImplementedFunctionError(f.function);
+        if (result is bool && f.function.ReturnType != AstType.BOOL) throw new PoorlyImplementedFunctionError(f.function);
+        if (result is string && f.function.ReturnType != AstType.COLOR) throw new PoorlyImplementedFunctionError(f.function);
         
 
         return result;
     }
 
-    public object EvaluateVar(Expresion expresion)
+    private object EvaluateVar(Expresion expresion)
     {
         Var v = (Var)expresion;
         if (!Variables.ContainsKey(v.Id.Text)) throw new Error(v.Location, $"The name {v.Id.Text} does not exist in the current context");
         return Variables[v.Id.Text];
     }
-
-
-
-
-
-
 
 }

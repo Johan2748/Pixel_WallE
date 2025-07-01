@@ -1,6 +1,3 @@
-
-using System.Dynamic;
-using System.Text;
 using ICSharpCode.TextEditor;
 
 class Canvas

@@ -1,7 +1,7 @@
 public class Parser
 {
-    public List<Token> Tokens;
-    public Scope Scope { get; private set; }
+    private List<Token> Tokens;
+    private Scope Scope;
 
     private int current = 0;
 
@@ -80,7 +80,7 @@ public class Parser
 
         while (!IsAtEnd())
         {
-            while(Match(TokenType.EO_LINE)){}
+            if (Match(TokenType.EO_LINE)) continue;
             if(!IsAtEnd())program.Body.Add(ParseStatement());
         }
 

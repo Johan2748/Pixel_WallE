@@ -9,7 +9,7 @@ public interface ICallable
 
     bool CheckArguments(List<Expresion> arguments)
     {
-        if (Arity != Types.Length) throw new PoorlyImplementedFunctionError(-1, this);
+        if (Arity != Types.Length) throw new PoorlyImplementedFunctionError(this);
 
         for (int i = 0; i < Types.Length; i++)
         {
@@ -19,7 +19,7 @@ public interface ICallable
         return true;
     }
 
-    object? Call(object[] arguments);
+    object? Call(object[] arguments, int line);
 }
 
 
@@ -32,9 +32,9 @@ public class Spawn : ICallable
 
     public AstType[] Types => [AstType.INT, AstType.INT];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
-        if ((int)arguments[0] >= Canvas.gridSize || (int)arguments[1] >= Canvas.gridSize) throw new IndexOutOfRangeError();
+        if ((int)arguments[0] >= Canvas.gridSize || (int)arguments[1] >= Canvas.gridSize) throw new IndexOutOfRangeError(line);
         Canvas.ActualX = (int)arguments[0];
         Canvas.ActualY = (int)arguments[1];
         return null;
@@ -49,7 +49,7 @@ public class ChangeColor : ICallable
 
     public AstType[] Types => [AstType.COLOR];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
         string color = (string)arguments[0];
         color = color[1..^1];
@@ -79,9 +79,9 @@ public class Size : ICallable
 
     public AstType[] Types => [AstType.INT];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
-        if ((int)arguments[0] < 1) throw new Error(-1, "Brush size cannot be less than 1");
+        if ((int)arguments[0] < 1) throw new Error(line, "Brush size cannot be less than 1");
         if ((int)arguments[0] % 2 == 0) Canvas.BrushSize = (int)arguments[0] - 1;
         else Canvas.BrushSize = (int)arguments[0];
         return null;
@@ -96,19 +96,19 @@ public class DrawLine : ICallable
 
     public AstType[] Types => [AstType.INT, AstType.INT, AstType.INT];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
         int x = (int)arguments[0];
         int y = (int)arguments[1];
         int length = (int)arguments[2];
 
-        if (x > 1 || x < -1) throw new Error(-1, "Invalid direction");
-        if (y > 1 || y < -1) throw new Error(-1, "Invalid direction");
+        if (x > 1 || x < -1) throw new Error(line, "Invalid direction");
+        if (y > 1 || y < -1) throw new Error(line, "Invalid direction");
 
         for (int i = 0; i < length; i++)
         {
             Canvas.SetCellColor(Canvas.ActualX, Canvas.ActualY, Canvas.ActualColor);
-            if (Canvas.ActualX + x >= Canvas.gridSize || Canvas.ActualY + y >= Canvas.gridSize || Canvas.ActualX + x < 0 || Canvas.ActualY + y < 0) throw new IndexOutOfRangeError();
+            if (Canvas.ActualX + x >= Canvas.gridSize || Canvas.ActualY + y >= Canvas.gridSize || Canvas.ActualX + x < 0 || Canvas.ActualY + y < 0) throw new IndexOutOfRangeError(line);
             Canvas.ActualX += x;
             Canvas.ActualY += y;
         }
@@ -125,21 +125,21 @@ public class DrawCircle : ICallable
 
     public AstType[] Types => [AstType.INT, AstType.INT, AstType.INT];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
         int dir_x = (int)arguments[0];
         int dir_y = (int)arguments[1];
         int radius = (int)arguments[2];
 
-        if (dir_x > 1 || dir_x < -1) throw new Error(-1, "Invalid direction");
-        if (dir_y > 1 || dir_y < -1) throw new Error(-1, "Invalid direction");
-        if (radius < 1) throw new Error(-1, "Radius cannot be less than 1");
+        if (dir_x > 1 || dir_x < -1) throw new Error(line, "Invalid direction");
+        if (dir_y > 1 || dir_y < -1) throw new Error(line, "Invalid direction");
+        if (radius < 1) throw new Error(line, "Radius cannot be less than 1");
 
 
         int centerX = Canvas.ActualX + dir_x * radius;
         int centerY = Canvas.ActualY + dir_y * radius;
 
-        if (centerX >= Canvas.gridSize || centerY >= Canvas.gridSize || centerX < 0 || centerY < 0) throw new IndexOutOfRangeError();
+        if (centerX >= Canvas.gridSize || centerY >= Canvas.gridSize || centerX < 0 || centerY < 0) throw new IndexOutOfRangeError(line);
         Canvas.ActualX += dir_x * radius;
         Canvas.ActualY += dir_y * radius;
 
@@ -203,7 +203,7 @@ public class DrawRectangle : ICallable
 
     public AstType[] Types => [AstType.INT, AstType.INT, AstType.INT, AstType.INT, AstType.INT];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
         int x = (int)arguments[0];
         int y = (int)arguments[1];
@@ -211,13 +211,13 @@ public class DrawRectangle : ICallable
         int width = (int)arguments[3];
         int height = (int)arguments[4];
 
-        if (x > 1 || x < -1) throw new Error(-1, "Invalid direction");
-        if (y > 1 || y < -1) throw new Error(-1, "Invalid direction");
-        if (lenght < 0) throw new Error(-1, "Distance cannot be neggative");
-        if (width < 1) throw new Error(-1, "Width cannot be less than 1");
-        if (height < 1) throw new Error(-1, "Height cannot be less than 1");
+        if (x > 1 || x < -1) throw new Error(line, "Invalid direction");
+        if (y > 1 || y < -1) throw new Error(line, "Invalid direction");
+        if (lenght < 0) throw new Error(line, "Distance cannot be neggative");
+        if (width < 1) throw new Error(line, "Width cannot be less than 1");
+        if (height < 1) throw new Error(line, "Height cannot be less than 1");
 
-        if (Canvas.ActualX + x * lenght >= Canvas.gridSize || Canvas.ActualY + y * lenght >= Canvas.gridSize || Canvas.ActualX + x * lenght < 0 || Canvas.ActualY + y * lenght < 0) throw new IndexOutOfRangeError();
+        if (Canvas.ActualX + x * lenght >= Canvas.gridSize || Canvas.ActualY + y * lenght >= Canvas.gridSize || Canvas.ActualX + x * lenght < 0 || Canvas.ActualY + y * lenght < 0) throw new IndexOutOfRangeError(line);
         Canvas.ActualX += x * lenght;
         Canvas.ActualY += y * lenght;
 
@@ -247,7 +247,7 @@ public class Fill : ICallable
 
     public AstType[] Types => [];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
         int startX = Canvas.ActualX;
         int startY = Canvas.ActualY;
@@ -281,7 +281,6 @@ public class Fill : ICallable
 
     private void ExploreNeighbor(Queue<(int x, int y)> queue, int x, int y, Color targetColor)
     {
-        // Verificar límites y color
         if (x >= 0 && x < Canvas.gridSize && 
             y >= 0 && y < Canvas.gridSize && 
             Canvas.CellColors[x, y] == targetColor)
@@ -302,7 +301,7 @@ public class GetActualX : ICallable
 
     public AstType[] Types => [];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
         return Canvas.ActualX;
     }
@@ -316,7 +315,7 @@ public class GetActualY : ICallable
 
     public AstType[] Types => [];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
         return Canvas.ActualY;
     }
@@ -330,7 +329,7 @@ public class GetCanvasSize : ICallable
 
     public AstType[] Types => [];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
         return Canvas.gridSize;
     }
@@ -344,7 +343,7 @@ public class GetColorCount : ICallable
 
     public AstType[] Types => [AstType.COLOR, AstType.INT, AstType.INT, AstType.INT, AstType.INT];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
         string color = (string)arguments[0];
         color = color[1..^1];
@@ -354,7 +353,7 @@ public class GetColorCount : ICallable
         int x2 = (int)arguments[3];
         int y2 = (int)arguments[4];
 
-        if (x1 < 0 || x1 >= Canvas.gridSize || y1 < 0 || y1 >= Canvas.gridSize || x2 < 0 || x2 >= Canvas.gridSize || y2 < 0 || y2 >= Canvas.gridSize) throw new IndexOutOfRangeError();
+        if (x1 < 0 || x1 >= Canvas.gridSize || y1 < 0 || y1 >= Canvas.gridSize || x2 < 0 || x2 >= Canvas.gridSize || y2 < 0 || y2 >= Canvas.gridSize) throw new IndexOutOfRangeError(line);
 
         int startX = Math.Min(x1, x2);
         int startY = Math.Min(y1, y2);
@@ -383,7 +382,7 @@ public class IsBrushColor : ICallable
 
     public AstType[] Types => [AstType.COLOR];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
         string color = (string)arguments[0];
         color = color[1..^1];
@@ -400,7 +399,7 @@ public class IsBrushSize : ICallable
 
     public AstType[] Types => [AstType.INT];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
         if ((int)arguments[0] == Canvas.BrushSize) return 1;
         return 0;
@@ -415,7 +414,7 @@ public class IsCanvasColor : ICallable
 
     public AstType[] Types => [AstType.COLOR, AstType.INT, AstType.INT];
 
-    public object? Call(object[] arguments)
+    public object? Call(object[] arguments, int line)
     {
         string color = (string)arguments[0];
         color = color[1..^1];

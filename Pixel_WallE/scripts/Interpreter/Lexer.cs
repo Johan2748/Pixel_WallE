@@ -60,6 +60,11 @@ public class Lexer
         Tokens.Add(new Token(token, text, line));
     }
 
+    private void SkipComment()
+    {
+        while (!Match('\n')) Advance();
+    }
+
     private void GetNumber()
     {
         while (Check.IsDigit(Peek())) Advance();
@@ -88,7 +93,7 @@ public class Lexer
         AddToken(TokenType.COLOR);
     }
 
-    public void GetTokens()
+    private void GetTokens()
     {
         while (!IsAtEnd())
         {
@@ -109,6 +114,7 @@ public class Lexer
             case ' ': break;
             case '\r': break;
             case '\t': break;
+            case '#' : SkipComment(); break;
 
             case '\n': Tokens.Add(new Token(TokenType.EO_LINE, "", line)); line++; break;
 

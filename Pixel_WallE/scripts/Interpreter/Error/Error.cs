@@ -34,10 +34,10 @@ public class BinOpError : Error
 
 public class PoorlyImplementedFunctionError : Error
 {
-    public PoorlyImplementedFunctionError(int line, ICallable function) : base(line, $"This function {function} is poorly implemented") { }
+    public PoorlyImplementedFunctionError(ICallable function) : base(-1, $"This function {function} is poorly implemented") { }
 }
 
 public class IndexOutOfRangeError : Error
 {
-    public IndexOutOfRangeError() : base(-1, "Index out of range") { }
+    public IndexOutOfRangeError(int line) : base(line, "Index out of range") { }
 }

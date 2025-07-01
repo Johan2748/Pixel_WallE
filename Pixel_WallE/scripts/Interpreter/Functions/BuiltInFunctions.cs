@@ -29,7 +29,7 @@ public static class BuiltInFunctions
         return functions[name];
     }
 
-public static ICallable GetInstruction(string name)
+    public static ICallable GetInstruction(string name)
     {
         return instructions[name];
     }

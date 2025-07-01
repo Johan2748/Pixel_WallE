@@ -9,8 +9,6 @@ public class Label : Statement
 {
     public override Token Id { get; protected set; }
 
-    public int Index;
-
     public Label(Token id)
     {
         Id = id;

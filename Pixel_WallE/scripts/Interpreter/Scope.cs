@@ -1,7 +1,7 @@
 public class Scope
 {
     private List<Label> labels;
-    public List<Var> variables { get; }
+    private List<Var> variables { get; }
 
     public Scope()
     {
